@@ -66,7 +66,7 @@ public class ConsistentHash<N> {
             return null;
         }
 
-        long code = hashFunc.encode(key);
+        long code = hashFunc.hash(key);
         if (! circle.containsKey(code)) {
             // TODO what's the performance of tailMap?
             ConcurrentNavigableMap<Long, N> tailMap = circle.tailMap(code);
@@ -76,8 +76,8 @@ public class ConsistentHash<N> {
         return circle.get(code);
     }
 
-    public Integer getNumberOfReplicas() {
-        return numberOfReplicas;
+    public String getCircleRecord(String key) {
+        return hashFunc.toRecord(get(key));
     }
 
     public Map<Long, String> getCircleRecords() {
@@ -89,5 +89,9 @@ public class ConsistentHash<N> {
         }
 
         return records;
+    }
+
+    public Integer getNumberOfReplicas() {
+        return numberOfReplicas;
     }
 }

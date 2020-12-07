@@ -19,7 +19,7 @@ public class CacheServiceImpl implements CacheService {
     private static volatile ConsistentHash<StringRedisTemplate> consistentHash;
 
     public CacheServiceImpl(HashFunc hashFunc, CacheListConfig config) {
-        consistentHash = new ConsistentHash<>(hashFunc, config.getList(), 10);
+        consistentHash = new ConsistentHash<>(hashFunc, config.getList(), 30);
     }
 
     /**
@@ -53,7 +53,12 @@ public class CacheServiceImpl implements CacheService {
     }
 
     @Override
-    public Map<Long, String> getShards() {
+    public String getShardId(String key) {
+        return consistentHash.getCircleRecord(key);
+    }
+
+    @Override
+    public Map<Long, String> getCircleShardIds() {
         return consistentHash.getCircleRecords();
     }
 

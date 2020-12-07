@@ -28,7 +28,9 @@ public interface CacheService {
      */
     RedisTemplate getShard(String key);
 
-    Map<Long, String> getShards();
+    String getShardId(String key);
+
+    Map<Long, String> getCircleShardIds();
 
     /**
      * ==============================================

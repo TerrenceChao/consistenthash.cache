@@ -96,4 +96,22 @@ public class SeedRandomHashFuncTest {
             Assertions.assertFalse(records.contains(hash));
         }
     }
+
+    /**
+     * 一樣的 record(pattern, string) 不論經過幾次 hash 結果都會一樣
+     */
+    @Test
+    public void testSameHashWithTheSameRecord() {
+        // arrange
+        String record = "a wonderful say";
+        hashFunc = new SeedRandomHashFunc();
+
+        // action
+        long expected = hashFunc.hash(record);
+
+        // assert
+        for (int i = 0; i < 100; i++) {
+            Assertions.assertEquals(expected, hashFunc.hash(record));
+        }
+    }
 }

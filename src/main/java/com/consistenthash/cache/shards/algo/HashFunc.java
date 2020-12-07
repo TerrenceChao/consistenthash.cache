@@ -4,5 +4,5 @@ public interface HashFunc<N> {
     String toRecord(N node);
     void seed(String pattern);
     long hash();
-    long encode(String pattern);
+    long hash(String pattern);
 }

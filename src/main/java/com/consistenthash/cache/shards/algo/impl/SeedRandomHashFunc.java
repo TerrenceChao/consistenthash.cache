@@ -45,7 +45,12 @@ public class SeedRandomHashFunc implements HashFunc<StringRedisTemplate> {
     }
 
     @Override
-    public long encode(String pattern) {
+    public long hash(String pattern) {
+        seed(pattern);
+        return random.nextLong();
+    }
+
+    private long encode(String pattern) {
         long code = 0;
 
         int len = pattern.length();
