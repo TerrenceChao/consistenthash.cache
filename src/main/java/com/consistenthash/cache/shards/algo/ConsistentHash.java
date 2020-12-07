@@ -4,19 +4,19 @@ import java.util.*;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-public class ConsistentHash<T> {
+public class ConsistentHash<N> {
 
-    private final HashFunc hashFunc;
+    private static volatile HashFunc hashFunc;
     private final int numberOfReplicas;
-    private final ConcurrentSkipListMap<Long, T> circle = new ConcurrentSkipListMap<>();
+    private final ConcurrentSkipListMap<Long, N> circle = new ConcurrentSkipListMap<>();
 
-    public ConsistentHash(HashFunc hashFunc,
-                          Collection<T> nodes,
+    public ConsistentHash(HashFunc<N> hashFunc,
+                          Collection<N> nodes,
                           int numberOfReplicas) {
         this.hashFunc = hashFunc;
         this.numberOfReplicas = numberOfReplicas;
 
-        for (T node : nodes) {
+        for (N node : nodes) {
             add(node);
         }
     }
@@ -24,46 +24,56 @@ public class ConsistentHash<T> {
     /**
      * @param node
      */
-    public void add(T node) {
-        String pattern = node.toString();
-        hashFunc.seed(pattern);
+    public void add(N node) {
+        String record = hashFunc.toRecord(node);
+        hashFunc.seed(record);
 
         for (int i = 0; i < numberOfReplicas; i++) {
 //            long hash = hashFunc.hash(pattern + i); // 是否 "+ i", 端視妳的 HashFunc 是否可設定 seed
-            long hash = hashFunc.hash(pattern);
+            long hash = hashFunc.hash();
             if (! circle.containsKey(hash)) {
                 circle.put(hash, node);
             }
         }
     }
 
-    public void remove(T node) {
-        String pattern = node.toString();
-        hashFunc.seed(pattern);
+    public void remove(N node) {
+        String record = hashFunc.toRecord(node);
+        hashFunc.seed(record);
 
         for (int i = 0; i < numberOfReplicas; i++) {
 //            long hash = hashFunc.hash(pattern + i); // 是否 "+ i", 端視妳的 HashFunc 是否可設定 seed
-            long hash = hashFunc.hash(pattern);
-            T circleNode = circle.get(hash);
-            if (Objects.nonNull(circleNode) && circleNode.toString().equals(pattern)) {
+            long hash = hashFunc.hash();
+            N circleNode = circle.get(hash);
+            if (Objects.isNull(circleNode)) {
+                continue;
+            }
+
+            String recordB = hashFunc.toRecord(circleNode);
+            if (recordB.equals(record)) {
                 circle.remove(hash);
             }
         }
     }
 
-    public T get(String key) {
+    /**
+     * TODO consider concurrent issue
+     * @param key
+     * @return
+     */
+    public N get(String key) {
         if (circle.isEmpty()) {
             return null;
         }
 
-        long hash = hashFunc.hash(key);
-        if (! circle.containsKey(hash)) {
+        long code = hashFunc.encode(key);
+        if (! circle.containsKey(code)) {
             // TODO what's the performance of tailMap?
-            ConcurrentNavigableMap<Long, T> tailMap = circle.tailMap(hash);
-            hash = tailMap.isEmpty() ? circle.firstKey() : tailMap.firstKey();
+            ConcurrentNavigableMap<Long, N> tailMap = circle.tailMap(code);
+            code = tailMap.isEmpty() ? circle.firstKey() : tailMap.firstKey();
         }
 
-        return circle.get(hash);
+        return circle.get(code);
     }
 
     public Integer getNumberOfReplicas() {
@@ -72,10 +82,10 @@ public class ConsistentHash<T> {
 
     public Map<Long, String> getCircleRecords() {
         Map<Long, String> records = new HashMap<>();
-        for (Map.Entry<Long, T> shard : circle.entrySet()) {
+        for (Map.Entry<Long, N> shard : circle.entrySet()) {
             Long hash = shard.getKey();
-            T node = shard.getValue();
-            records.put(hash, node.toString());
+            N node = shard.getValue();
+            records.put(hash, hashFunc.toRecord(node));
         }
 
         return records;

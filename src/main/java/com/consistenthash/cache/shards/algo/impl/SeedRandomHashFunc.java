@@ -1,14 +1,17 @@
 package com.consistenthash.cache.shards.algo.impl;
 
 import com.consistenthash.cache.shards.algo.HashFunc;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 
 @Component
-public class SeedRandomHashFunc implements HashFunc {
+public class SeedRandomHashFunc implements HashFunc<StringRedisTemplate> {
 
     private Random random;
     private final String CHAR66 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:;,.";
@@ -21,30 +24,42 @@ public class SeedRandomHashFunc implements HashFunc {
     }
 
     @Override
+    public String toRecord(StringRedisTemplate node) {
+        LettuceConnectionFactory factory = (LettuceConnectionFactory) node.getConnectionFactory();
+        String host = factory.getHostName();
+        String port = String.valueOf(factory.getPort());
+
+        return host.concat(":").concat(port);
+    }
+
+    @Override
     public void seed(String pattern) {
+        long seed = encode(pattern);
         random = new Random();
-        long seed = toSeed(pattern);
         random.setSeed(seed);
     }
 
     @Override
-    public Long hash(String pattern) {
-        return random.nextLong();
+    public long hash() {
+        return Objects.nonNull(random) ? random.nextLong() : -1;
     }
 
-    private long toSeed(String pattern) {
-        long seed = 0;
+    @Override
+    public long encode(String pattern) {
+        long code = 0;
 
         int len = pattern.length();
         for (int i = 0; i < len; i++) {
             Character c = pattern.charAt(i);
+
             if (dict.containsKey(c)) {
-                seed += dict.get(c) * (i + 1);
+                code += dict.get(c) * (i + 1);
             } else {
-                seed += i * (i + 1);
+                code += i * (i + 1);
             }
         }
 
-        return seed;
+        return code;
     }
+
 }

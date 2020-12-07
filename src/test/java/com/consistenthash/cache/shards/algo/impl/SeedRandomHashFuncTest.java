@@ -25,15 +25,15 @@ public class SeedRandomHashFuncTest {
     @Test
     public void testTotalHashValues() {
         // arrange
-        String pattern = "localhost:6379";
+        String record = "localhost:6379";
         hashFunc = new SeedRandomHashFunc();
         Set<Long> records = new HashSet<>();
         int totalHashValues = 100;
 
         // action
-        hashFunc.seed(pattern);
+        hashFunc.seed(record);
         for (int i = 1; i <= totalHashValues; i++) {
-            long hash = hashFunc.hash(pattern);
+            long hash = hashFunc.hash();
             records.add(hash);
         }
 
@@ -47,24 +47,24 @@ public class SeedRandomHashFuncTest {
      * ref: http://tw.gitbook.net/java/util/timezone_setseed.html
      */
     @Test
-    public void testWithSamePattern() {
+    public void testWithSameRecord() {
         // arrange
-        String pattern = "127.0.0.1:6380";
+        String record = "127.0.0.1:6380";
         hashFunc = new SeedRandomHashFunc();
         Map<Integer, Long> recordMap = new HashMap<>();
         int totalHashValues = 50;
 
         // action
-        hashFunc.seed(pattern);
+        hashFunc.seed(record);
         for (int idx = 1; idx <= totalHashValues; idx++) {
-            long hash = hashFunc.hash(pattern);
+            long hash = hashFunc.hash();
             recordMap.put(idx, hash);
         }
 
-        // assert (seed again with same pattern)
-        hashFunc.seed(pattern);
+        // assert (seed again with same record)
+        hashFunc.seed(record);
         for (int idx = 1; idx <= totalHashValues; idx++) {
-            long actualHash = hashFunc.hash(pattern);
+            long actualHash = hashFunc.hash();
             long expectedHash = recordMap.get(idx);
             Assertions.assertEquals(expectedHash, actualHash);
         }
@@ -74,25 +74,25 @@ public class SeedRandomHashFuncTest {
      * 測試在不同的 seed 下，hash 絕不會碰撞!? (無意義的測試!?)
      */
     @Test
-    public void testWithDiffPattern() {
+    public void testWithDiffRecord() {
         // arrange
-        String patternA = "localhost:6379";
+        String recordA = "localhost:6379";
         hashFunc = new SeedRandomHashFunc();
         Set<Long> records = new HashSet<>();
         int totalHashValues = 1000;
 
         // action
-        hashFunc.seed(patternA);
+        hashFunc.seed(recordA);
         for (int i = 1; i <= totalHashValues; i++) {
-            long hash = hashFunc.hash(patternA);
+            long hash = hashFunc.hash();
             records.add(hash);
         }
 
         // assert
-        String patternB = "127.0.0.1:6380";
-        hashFunc.seed(patternB);
+        String recordB = "127.0.0.1:6380";
+        hashFunc.seed(recordB);
         for (int i = 1; i <= totalHashValues; i++) {
-            long hash = hashFunc.hash(patternB);
+            long hash = hashFunc.hash();
             Assertions.assertFalse(records.contains(hash));
         }
     }

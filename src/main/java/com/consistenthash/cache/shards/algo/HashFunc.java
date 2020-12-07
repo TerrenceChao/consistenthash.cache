@@ -1,6 +1,8 @@
 package com.consistenthash.cache.shards.algo;
 
-public interface HashFunc {
+public interface HashFunc<N> {
+    String toRecord(N node);
     void seed(String pattern);
-    Long hash(String pattern);
+    long hash();
+    long encode(String pattern);
 }
