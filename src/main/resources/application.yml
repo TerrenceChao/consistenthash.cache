@@ -1,0 +1,42 @@
+server:
+  port: ${SERVER_PORT}
+
+spring:
+  profiles:
+    active: local
+  application:
+    name: cache
+
+consistenthash:
+  shard-replicas: ${SHARD_REPLICAS}
+  caches:
+    redis1:
+      host: ${REDIS_HOST_1}
+      port: ${REDIS_PORT_1}
+      lettuce:
+        pool:
+          min-idle: 5
+          max-idle: 10
+          max-active: 8
+          max-wait: 1ms
+        shutdown-timeout: 100ms
+    redis2:
+      host: ${REDIS_HOST_2}
+      port: ${REDIS_PORT_2}
+      lettuce:
+        pool:
+          min-idle: 5
+          max-idle: 10
+          max-active: 8
+          max-wait: 1ms
+        shutdown-timeout: 100ms
+    redis3:
+      host: ${REDIS_HOST_3}
+      port: ${REDIS_PORT_3}
+      lettuce:
+        pool:
+          min-idle: 5
+          max-idle: 10
+          max-active: 8
+          max-wait: 1ms
+        shutdown-timeout: 100ms
