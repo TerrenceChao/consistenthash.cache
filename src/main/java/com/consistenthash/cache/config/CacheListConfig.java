@@ -27,10 +27,6 @@ public class CacheListConfig {
 
     private List<StringRedisTemplate> cacheList = new ArrayList<>();
 
-    public Integer getNumberOfReplicas() {
-        return 10;
-    }
-
     public List<StringRedisTemplate> getList() {
         cacheList.clear();
         cacheList.add(redis1);
