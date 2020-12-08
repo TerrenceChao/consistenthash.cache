@@ -1,11 +1,9 @@
 package com.consistenthash.cache.service.impl;
 
 import com.consistenthash.cache.service.CacheService;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.Map;
 
@@ -16,10 +14,20 @@ public class CacheServiceImplTest {
     @Autowired
     private CacheService cacheService;
 
+    @BeforeEach
+    public void before() {
+        for (Map.Entry<Long, String> shard : cacheService.getCircleShardIds().entrySet()) {
+            Long key = shard.getKey();
+            String value = shard.getValue();
+            System.out.println("key: " + key + "\tvalue: " + value);
+        }
+        System.out.println("\n\n");
+    }
+
     @Test
     public void test() {
         // arrange
-        String key = "Greeting ";
+        String key = "Greeting-";
         String value = "Hello World! ";
         int times = 1000;
 
@@ -37,13 +45,8 @@ public class CacheServiceImplTest {
             String actualVal = cacheService.get(k);
             Assertions.assertEquals(expectedVal, actualVal);
 
-            System.out.println(k + " on " + cacheService.getShardId(k));
-        }
-
-        for (Map.Entry<Long, String> shard : cacheService.getCircleShardIds().entrySet()) {
-            Long skey = shard.getKey();
-            String svalue = shard.getValue();
-            System.out.println("key: " + skey + "\tvalue: " + svalue);
+//            System.out.println(cacheService.getShardId(k) + " (k, v): (" + k + ", " + actualVal + ")");
+            cacheService.delete(k);
         }
     }
 }

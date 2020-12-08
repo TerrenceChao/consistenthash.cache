@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 public class ConsistentHash<N> {
 
-    private static volatile HashFunc hashFunc;
+    private static HashFunc hashFunc;
     private final int numberOfReplicas;
     private final ConcurrentSkipListMap<Long, N> circle = new ConcurrentSkipListMap<>();
 

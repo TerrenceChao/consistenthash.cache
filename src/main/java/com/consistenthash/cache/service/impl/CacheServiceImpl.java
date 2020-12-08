@@ -218,9 +218,4 @@ public class CacheServiceImpl implements CacheService {
         String json = (String) this.hmGet(keyFormat, field, keyValues);
         return json == null ? null : JSON.parseObject(json, String.class);
     }
-
-    public static void main(String[] args) {
-        String key = String.format("val1", "val2");
-        System.out.println(key);
-    }
 }
